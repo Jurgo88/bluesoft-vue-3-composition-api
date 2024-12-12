@@ -9,49 +9,37 @@
     </div>
 </template>
 
-<script>
-import { defineComponent, ref } from "vue";
+<script setup>
+import { ref } from 'vue';
+import { useTodoStore } from '@/stores/todoStore';
 
-export default defineComponent({
-    name: "TodoForm",
+// Access the Pinia store
+const todoStore = useTodoStore();
 
-    props: ["todos"],
+// Reactive variable for task input
+const task = ref("");
 
-    emits: ["todos-changed"],
-
-    setup(props, { emit }) {
-        const task = ref("");
-
-        const handleAddTodo = () => {
-            if (task.value) {
-                emit("todos-changed", [
-                    ...props.todos,
-                    {
-                        id:
-                            props.todos.length > 0
-                                ? props.todos[props.todos.length - 1].id + 1
-                                : 0,
-                        label: task.value,
-                        checked: false,
-                    },
-                ]);
-                task.value = "";
-            }
+// Handle adding a new todo
+const handleAddTodo = () => {
+    if (task.value) {
+        const newTodo = {
+            id: todoStore.todos.length > 0 ? todoStore.todos[todoStore.todos.length - 1].id + 1 : 0,
+            title: task.value,
+            completed: false
         };
+        // Add the new todo to the store
+        console.log(newTodo);
+        todoStore.addTodoToStore(newTodo);
+        task.value = "";  // Reset the task input
+    }
+};
 
-        const handleKeyUp = (e) => {
-            if (e.keyCode === 13) {
-                handleAddTodo();
-            }
-        };
-
-        return {
-            task,
-            handleAddTodo,
-            handleKeyUp,
-        };
-    },
-});
+// Handle "Enter" key press to add todo
+const handleKeyUp = (e) => {
+    if (e.keyCode === 13) {
+        handleAddTodo();
+    }
+};
 </script>
 
 <style scoped>
@@ -67,9 +55,7 @@ export default defineComponent({
     border: 1px solid rgba(1, 1, 1, 0.3);
     margin-right: 5px;
     width: 250px;
-    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Roboto",
-        "Oxygen", "Ubuntu", "Cantarell", "Fira Sans", "Droid Sans",
-        "Helvetica Neue", sans-serif;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Roboto", "Oxygen", "Ubuntu", "Cantarell", "Fira Sans", "Droid Sans", "Helvetica Neue", sans-serif;
     font-size: 16px;
 }
 
@@ -83,6 +69,7 @@ export default defineComponent({
     border-radius: 4px;
     width: 110px;
 }
+
 .todo-form button:hover {
     background: #1474d2;
 }
